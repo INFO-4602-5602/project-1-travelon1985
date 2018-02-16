@@ -1,0 +1,467 @@
+<html>
+<head>
+<title>Bret McSpadden Project 1</title>
+<link rel="stylesheet" type="text/css" href="project1.css"></link>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--Put your D3 import statement between these two lines-->
+    <script src="https://d3js.org/d3.v4.js" charset="utf-8"></script>
+<!--Put your D3 import statement between these two lines-->
+</head>
+
+<body>
+	<div id="partOne">
+        <h1>Part One: </h1>
+	</div>
+    
+    <div id="partTwo">
+        <h1>Part Two: </h1>
+        <div id="scatterplot">
+        </div>
+	</div>
+    
+    <div id="partThree">
+        <h1>Part Three &amp; Four: </h1>
+        <div id="linegraph">
+            <p id="scatterLabel"></p>
+        </div>
+	</div>
+    
+    <div id="partFive">
+        <h1>Part Five: </h1>
+        <div id="scatterplotSet">
+        </div>
+	</div>
+    
+    <script type="text/javascript">
+        d3.csv("data/anscombe_I.csv", function(data1) {
+            checkDataset(data1); 
+        });
+        d3.csv("data/anscombe_II.csv", function(data2) {
+            checkDataset(data2); 
+        });
+        d3.csv("data/anscombe_III.csv", function(data3) {
+            checkDataset(data3); 
+        });
+        d3.csv("data/anscombe_IV.csv", function(data4) {
+            checkDataset(data4);
+        });
+        
+        // Leave this to test your data uploading. All data uploading should be above this line
+        function checkDataset(dataset) {
+            if (dataset.length == 11)
+                $("#partOne").append("<p>data loaded correctly</p>");
+            else
+                $("#partOne").append("<p>data loaded incorrectly. Try using the debugger to help you find the bug!</p>");
+        }
+        
+        // Put your part two code here ***********************
+        
+        // non-data related parts
+        var w = 700; // width of vis
+        var h = 500; //height of vis
+        var vals = ['x', 'y'];
+        var xVal = vals[0]; //value to plot on x axis
+        var yVal = vals[1]; // value to plot on y axis
+        
+        //dimensions and margins of the graph
+        var margin = {top: 20, right: 20, bottom: 30, left: 50};
+        var width = w - margin.left - margin.right;
+        var height = h - margin.top - margin.bottom;
+        
+        //set the ranges
+        var x = d3.scaleLinear().range([0,width]);
+        var y = d3.scaleLinear().range([height,0]); //pixel space?
+        
+        //append teh svg object to the body of the page
+        //append a group element to svg
+        //moves the group element to the top left margin
+        var svg1 = d3.select("#scatterplot").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate("+margin.left + "," + margin.top +")");
+        
+        // Get the data
+        d3.csv("data/anscombe_I.csv", function(error, data){
+            if(error) throw error;
+            
+        //scale the range of the data
+            x.domain(d3.extent(data, function(d) {return parseFloat(d[xVal]);}));
+            y.domain([0, d3.max(data, function(d) {return parseFloat(d[yVal]);})]);
+            
+            //add points
+            svg1.selectAll("circle")
+               .data(data)
+               .enter()
+               .append("circle")
+               .attr("r", 5)
+               .attr("cx", function(d){return x(d[xVal]);})
+               .attr("cy", function(d){return y(d[yVal]);})
+            
+            // add x axis
+            svg1.append("g")
+               .attr("transform", "translate(0, " + height +")")
+               .call(d3.axisBottom(x));
+            // add y axis
+            svg1.append("g")
+               .call(d3.axisLeft(y));
+               
+        });
+        
+        
+        // Put your part three & four code here ***********************
+        // non-data related parts
+        var w = 700; // width of vis
+        var h = 500; //height of vis
+        var vals = ['x', 'y'];
+        var xVal = vals[0]; //value to plot on x axis
+        var yVal = vals[1]; // value to plot on y axis
+        
+        //dimensions and margins of the graph
+        var margin = {top: 20, right: 20, bottom: 30, left: 50};
+        var width = w - margin.left - margin.right;
+        var height = h - margin.top - margin.bottom;
+        
+        //set the ranges
+        var x = d3.scaleLinear().range([0,width]);
+        var y = d3.scaleLinear().range([height,0]); //pixel space?
+        
+        // define the line from https://gist.github.com/d3noob/402dd382a51a4f6eea487f9a35566de0
+        var valueline = d3.line()
+            .x(function(d) {return x(d[xVal]);})
+            .y(function(d) {return y(d[yVal]);});
+        
+        //append teh svg object to the body of the page
+        //append a group element to svg
+        //moves the group element to the top left margin
+        var svg2 = d3.select("#linegraph").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate("+margin.left + "," + margin.top +")");
+        
+        // Get the data
+        d3.csv("data/anscombe_I.csv", function(error, data){
+            if(error) throw error;
+            
+        //scale the range of the data
+            x.domain(d3.extent(data, function(d) {return parseFloat(d[xVal]);}));
+            y.domain([0, d3.max(data, function(d) {return parseFloat(d[yVal]);})]);
+        
+        //sort data from http://www.javascriptkit.com/javatutors/arraysort.shtml
+            data.sort(function(a,b){
+                return(a.x - b.x);
+            });
+            
+            //add points
+            svg2.selectAll("circle")
+               .data(data)
+               .enter()
+               .append("circle")
+               .attr("r", 5)
+               .attr("cx", function(d){return x(d[xVal]);})
+               .attr("cy", function(d){return y(d[yVal]);})
+            
+            // mouse code from http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
+                .on("mouseover", handleMouseOver) 
+                .on("mouseout", handleMouseOut)
+                .on("click", handleMouseClick);
+            
+            //create event handlers for mouse
+            function handleMouseOver(d, i) {
+                d3.select(this).style("fill", "red");
+            }
+            
+            function handleMouseOut(d,i) {
+                d3.select(this).style("fill", "black");
+            }
+            
+            function handleMouseClick(d,i) {
+                d3.select("#scatterLabel")
+                    .text("x = " +d.x+ ", y = " +d.y);
+            }
+            
+            //drawline from https://gist.github.com/d3noob/402dd382a51a4f6eea487f9a35566de0
+            svg2.append("path")
+                .data([data])
+                .attr("class", "line")
+                .attr("stroke", "black")
+                .attr("fill", "none")
+                .attr("d", valueline);
+            
+            // add x axis
+            svg2.append("g")
+               .attr("transform", "translate(0, " + height +")")
+               .call(d3.axisBottom(x));
+            // add y axis
+            svg2.append("g")
+               .call(d3.axisLeft(y));
+        });
+        
+        // Put your part five code here ***********************
+        
+        //Anscombe I
+        // non-data related parts
+        var w = 700; // width of vis // in trying to change the size of the visualization, it's changing every graph, but when I change this part in the others, it only makes the visible space smaller but not the chart itself. Is this universal? I have played around with this for too long, but would have liked part 5 to be 1/2 size of the others, insteaed of them all being the same size.
+        var h = 500; //height of vis
+        var vals = ['x', 'y'];
+        var xVal = vals[0]; //value to plot on x axis
+        var yVal = vals[1]; // value to plot on y axis
+        
+        //dimensions and margins of the graph
+        var margin = {top: 20, right: 20, bottom: 30, left: 50};
+        var width = w/2 - margin.left - margin.right;
+        var height = h/2 - margin.top - margin.bottom;
+        
+        //set the ranges
+        var x = d3.scaleLinear().range([0,width]);
+        var y = d3.scaleLinear().range([height,0]); //pixel space?
+        
+        // define the line from https://gist.github.com/d3noob/402dd382a51a4f6eea487f9a35566de0
+        var valueline = d3.line()
+            .x(function(d) {return x(d[xVal]);})
+            .y(function(d) {return y(d[yVal]);});
+        
+        //append teh svg object to the body of the page
+        //append a group element to svg
+        //moves the group element to the top left margin
+        var svg3 = d3.select("#scatterplotSet").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate("+margin.left + "," + margin.top +")");
+        
+        // Get the data
+        d3.csv("data/anscombe_I.csv", function(error, data){
+            if(error) throw error;
+            
+        //scale the range of the data
+            x.domain(d3.extent(data, function(d) {return parseFloat(d[xVal]);}));
+            y.domain([0, d3.max(data, function(d) {return parseFloat(d[yVal]);})]);
+        
+        //sort data from http://www.javascriptkit.com/javatutors/arraysort.shtml
+            data.sort(function(a,b){
+                return(a.x - b.x);
+            });
+            
+            //add points
+            svg3.selectAll("circle")
+               .data(data)
+               .enter()
+               .append("circle")
+               .attr("r", 5)
+               .attr("cx", function(d){return x(d[xVal]);})
+               .attr("cy", function(d){return y(d[yVal]);});
+            
+            //drawline from https://gist.github.com/d3noob/402dd382a51a4f6eea487f9a35566de0
+            //svg2.append("path")
+              //  .data([data])
+                //.attr("class", "line")
+                //.attr("stroke", "black")
+                //.attr("fill", "none")
+                //.attr("d", valueline);
+            
+            // add x axis
+            svg3.append("g")
+               .attr("transform", "translate(0, " + height +")")
+               .call(d3.axisBottom(x));
+            // add y axis
+            svg3.append("g")
+               .call(d3.axisLeft(y));
+            
+            // add label
+            var title = svg3.append("text")
+                            .attr("class", "label")
+                            .text("Anscombe I")
+                            .attr("x", width/2)
+                            .attr("y", margin.top - 20);
+            
+            
+        });
+        
+        //Anscombe II
+                
+        //append teh svg object to the body of the page
+        //append a group element to svg
+        //moves the group element to the top left margin
+        var svg4 = d3.select("#scatterplotSet").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate("+margin.left + "," + margin.top +")");
+        
+        // Get the data
+        d3.csv("data/anscombe_II.csv", function(error, data){
+            if(error) throw error;
+            
+        //scale the range of the data
+            x.domain(d3.extent(data, function(d) {return parseFloat(d[xVal]);}));
+            y.domain([0, d3.max(data, function(d) {return parseFloat(d[yVal]);})]);
+        
+        //sort data from http://www.javascriptkit.com/javatutors/arraysort.shtml
+            data.sort(function(a,b){
+                return(a.x - b.x);
+            });
+            
+            //add points
+            svg4.selectAll("circle")
+               .data(data)
+               .enter()
+               .append("circle")
+               .attr("r", 5)
+               .attr("cx", function(d){return x(d[xVal]);})
+               .attr("cy", function(d){return y(d[yVal]);});
+            
+            //drawline from https://gist.github.com/d3noob/402dd382a51a4f6eea487f9a35566de0
+            //svg2.append("path")
+              //  .data([data])
+                //.attr("class", "line")
+                //.attr("stroke", "black")
+                //.attr("fill", "none")
+                //.attr("d", valueline);
+            
+            // add x axis
+            svg4.append("g")
+               .attr("transform", "translate(0, " + height +")")
+               .call(d3.axisBottom(x));
+            // add y axis
+            svg4.append("g")
+               .call(d3.axisLeft(y));
+            
+            // add label
+            var title = svg4.append("text")
+                            .attr("class", "label")
+                            .text("Anscombe II")
+                            .attr("x", width/2)
+                            .attr("y", margin.top - 20);
+            
+            
+        });
+        
+        //Anscombe III
+                
+        //append teh svg object to the body of the page
+        //append a group element to svg
+        //moves the group element to the top left margin
+        var svg5 = d3.select("#scatterplotSet").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate("+margin.left + "," + margin.top +")");
+        
+        // Get the data
+        d3.csv("data/anscombe_III.csv", function(error, data){
+            if(error) throw error;
+            
+        //scale the range of the data
+            x.domain(d3.extent(data, function(d) {return parseFloat(d[xVal]);}));
+            y.domain([0, d3.max(data, function(d) {return parseFloat(d[yVal]);})]);
+        
+        //sort data from http://www.javascriptkit.com/javatutors/arraysort.shtml
+            data.sort(function(a,b){
+                return(a.x - b.x);
+            });
+            
+            //add points
+            svg5.selectAll("circle")
+               .data(data)
+               .enter()
+               .append("circle")
+               .attr("r", 5)
+               .attr("cx", function(d){return x(d[xVal]);})
+               .attr("cy", function(d){return y(d[yVal]);});
+            
+            //drawline from https://gist.github.com/d3noob/402dd382a51a4f6eea487f9a35566de0
+            //svg2.append("path")
+              //  .data([data])
+                //.attr("class", "line")
+                //.attr("stroke", "black")
+                //.attr("fill", "none")
+                //.attr("d", valueline);
+            
+            // add x axis
+            svg5.append("g")
+               .attr("transform", "translate(0, " + height +")")
+               .call(d3.axisBottom(x));
+            // add y axis
+            svg5.append("g")
+               .call(d3.axisLeft(y));
+            
+            // add label
+            var title = svg5.append("text")
+                            .attr("class", "label")
+                            .text("Anscombe III")
+                            .attr("x", width/2)
+                            .attr("y", margin.top - 20);
+            
+            
+        });
+        
+        //Anscombe IV
+                
+        //append teh svg object to the body of the page
+        //append a group element to svg
+        //moves the group element to the top left margin
+        var svg6 = d3.select("#scatterplotSet").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate("+margin.left + "," + margin.top +")");
+        
+        // Get the data
+        d3.csv("data/anscombe_IV.csv", function(error, data){
+            if(error) throw error;
+            
+        //scale the range of the data
+            x.domain(d3.extent(data, function(d) {return parseFloat(d[xVal]);}));
+            y.domain([0, d3.max(data, function(d) {return parseFloat(d[yVal]);})]);
+        
+        //sort data from http://www.javascriptkit.com/javatutors/arraysort.shtml
+            data.sort(function(a,b){
+                return(a.x - b.x);
+            });
+            
+            //add points
+            svg6.selectAll("circle")
+               .data(data)
+               .enter()
+               .append("circle")
+               .attr("r", 5)
+               .attr("cx", function(d){return x(d[xVal]);})
+               .attr("cy", function(d){return y(d[yVal]);});
+            
+            //drawline from https://gist.github.com/d3noob/402dd382a51a4f6eea487f9a35566de0
+            //svg2.append("path")
+              //  .data([data])
+                //.attr("class", "line")
+                //.attr("stroke", "black")
+                //.attr("fill", "none")
+                //.attr("d", valueline);
+            
+            // add x axis
+            svg6.append("g")
+               .attr("transform", "translate(0, " + height +")")
+               .call(d3.axisBottom(x));
+            // add y axis
+            svg6.append("g")
+               .call(d3.axisLeft(y));
+            
+            // add label
+            var title = svg6.append("text")
+                            .attr("class", "label")
+                            .text("Anscombe IV")
+                            .attr("x", width/2)
+                            .attr("y", margin.top - 20);
+            
+            
+        });
+        
+        
+        
+        
+        
+    </script>
+</body>
+
+
+</html>
